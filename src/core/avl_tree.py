@@ -1,0 +1,2 @@
+class AvlTree:
+    pass
