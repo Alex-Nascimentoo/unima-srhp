@@ -1,0 +1,76 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+
+# Poetry: keep pyproject.toml and poetry.lock tracked, ignore local virtualenvs and caches
+.cache/
+.cache/pypoetry/
+.python-version
+
+# Environment files (may contain secrets)
+.env
+.env.*
+.flaskenv
+instance/
+
+# Flask / app artifacts
+*.db
+*.sqlite3
+uploads/
+instance/
+
+# Test / coverage
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+nosetests.xml
+coverage.xml
+
+# Type checkers / caches
+.mypy_cache/
+.pyre/
+
+# Sphinx docs
+docs/_build/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Node / frontend
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Misc
+*.log
+*.swp
