@@ -196,7 +196,7 @@ class AvlTree:
     
     # ==================== Insertion ====================
     
-    def _insert(self, node, key, value):
+    def _insert(self, node, key, value, inserted):
         """
         Recursively insert a key-value pair into the tree.
         
@@ -204,22 +204,24 @@ class AvlTree:
             node: Current node in the recursion
             key: Key to insert
             value: Value to associate with the key
+            inserted: List with single boolean to track if insertion occurred
             
         Returns:
             New root of the subtree after insertion and rebalancing
         """
         # Base case: found the insertion point
         if not node:
+            inserted[0] = True
             return AvlNode(key, value)
         
         # Recursive insertion
         if key < node.key:
-            node.left = self._insert(node.left, key, value)
+            node.left = self._insert(node.left, key, value, inserted)
         elif key > node.key:
-            node.right = self._insert(node.right, key, value)
+            node.right = self._insert(node.right, key, value, inserted)
         else:
-            # Key already exists, update value
-            node.value = value
+            # Key already exists, don't update - set inserted to False
+            inserted[0] = False
             return node
         
         # Rebalance the tree after insertion
@@ -229,13 +231,28 @@ class AvlTree:
         """
         Insert a key-value pair into the AVL tree.
         
-        If the key already exists, its value is updated.
+        If the key already exists, returns a message and does not update the value.
         
         Args:
             key: Key to insert
             value: Optional value to associate with the key
+            
+        Returns:
+            Dictionary with 'success' (bool) and 'message' (str) keys
         """
-        self.root = self._insert(self.root, key, value)
+        inserted = [True]  # Use list to allow modification in nested function
+        self.root = self._insert(self.root, key, value, inserted)
+        
+        if inserted[0]:
+            return {
+                'success': True,
+                'message': f'Produto com key {key} inserido com sucesso.'
+            }
+        else:
+            return {
+                'success': False,
+                'message': f'Produto com key {key} já existe na árvore.'
+            }
     
     # ==================== Deletion ====================
     
@@ -359,3 +376,198 @@ class AvlTree:
         result = []
         self._inorder(self.root, result)
         return result
+    
+    # ==================== Product Recommendation ====================
+    
+    def _collect_similar_products(self, node, target_product, result, max_results=10):
+        """
+        Recursively collect products similar to the target product.
+        
+        Traverses the entire tree and collects products that match
+        either the category or subcategory of the target product.
+        
+        Args:
+            node: Current node in the traversal
+            target_product: Dictionary containing the target product info
+            result: List to append similar products to
+            max_results: Maximum number of results to collect
+        """
+        if not node or len(result) >= max_results:
+            return
+        
+        # Traverse left subtree
+        self._collect_similar_products(node.left, target_product, result, max_results)
+        
+        # Check if we've reached max results after left traversal
+        if len(result) >= max_results:
+            return
+        
+        # Process current node
+        if node.value and isinstance(node.value, dict):
+            current_product = node.value
+            
+            # Don't recommend the same product
+            if node.key == target_product.get('id'):
+                self._collect_similar_products(node.right, target_product, result, max_results)
+                return
+            
+            target_category = target_product.get('category')
+            target_subcategory = target_product.get('subcategory')
+            current_category = current_product.get('category')
+            current_subcategory = current_product.get('subcategory')
+            
+            # Calculate similarity score
+            similarity_score = 0
+            
+            # Exact subcategory match (highest priority)
+            if (target_subcategory and current_subcategory and 
+                target_subcategory.lower() == current_subcategory.lower()):
+                similarity_score = 2
+            
+            # Same category match (medium priority)
+            elif (target_category and current_category and 
+                  target_category.lower() == current_category.lower()):
+                similarity_score = 1
+            
+            # If there's any similarity, add to results
+            if similarity_score > 0:
+                result.append({
+                    'product': current_product,
+                    'key': node.key,
+                    'similarity_score': similarity_score,
+                    'match_type': 'subcategory' if similarity_score == 2 else 'category'
+                })
+        
+        # Traverse right subtree
+        self._collect_similar_products(node.right, target_product, result, max_results)
+    
+    def find_similar_products(self, product_id, max_results=10):
+        """
+        Find products similar to a given product based on category/subcategory.
+        
+        This method searches for the target product by ID, then traverses
+        the entire tree to find products with matching categories or subcategories.
+        Results are sorted by relevance (subcategory matches first, then category matches).
+        
+        Args:
+            product_id: ID (key) of the product to find recommendations for
+            max_results: Maximum number of recommendations to return (default: 10)
+            
+        Returns:
+            List of dictionaries containing similar products, sorted by relevance.
+            Each dictionary contains:
+                - product: The product data
+                - key: The product's key in the tree
+                - similarity_score: Score indicating match quality (2=subcategory, 1=category)
+                - match_type: Type of match ('subcategory' or 'category')
+            Returns empty list if product not found or no similar products exist.
+            
+        Example:
+            tree = AvlTree()
+            tree.insert(1, {'id': 1, 'name': 'Laptop', 'category': 'Electronics', 'subcategory': 'Computers'})
+            tree.insert(2, {'id': 2, 'name': 'Mouse', 'category': 'Electronics', 'subcategory': 'Accessories'})
+            tree.insert(3, {'id': 3, 'name': 'Desktop', 'category': 'Electronics', 'subcategory': 'Computers'})
+            
+            recommendations = tree.find_similar_products(1, max_results=5)
+            # Returns Desktop first (same subcategory), then Mouse (same category)
+        """
+        # Find the target product
+        target_node = self._search(self.root, product_id)
+        
+        if not target_node or not target_node.value:
+            return []
+        
+        target_product = target_node.value
+        
+        # Ensure product has required fields
+        if not isinstance(target_product, dict):
+            return []
+        
+        # Collect similar products
+        similar_products = []
+        self._collect_similar_products(self.root, target_product, similar_products, max_results)
+        
+        # Sort by similarity score (subcategory matches first, then category matches)
+        similar_products.sort(key=lambda x: x['similarity_score'], reverse=True)
+        
+        return similar_products
+    
+    def recommend_by_category(self, category, subcategory=None, max_results=10, exclude_id=None):
+        """
+        Find products by category and optionally subcategory.
+        
+        Useful for general category-based browsing or when you want recommendations
+        without a specific source product.
+        
+        Args:
+            category: Category to search for
+            subcategory: Optional subcategory to filter by
+            max_results: Maximum number of results to return
+            exclude_id: Optional product ID to exclude from results
+            
+        Returns:
+            List of dictionaries containing matching products with their keys
+            
+        Example:
+            recommendations = tree.recommend_by_category('Electronics', 'Computers', max_results=5)
+        """
+        results = []
+        self._recommend_by_category_helper(self.root, category, subcategory, 
+                                          results, max_results, exclude_id)
+        return results
+    
+    def _recommend_by_category_helper(self, node, category, subcategory, 
+                                     result, max_results, exclude_id):
+        """
+        Helper method to recursively find products by category.
+        
+        Args:
+            node: Current node in the traversal
+            category: Target category
+            subcategory: Optional target subcategory
+            result: List to append matching products to
+            max_results: Maximum number of results
+            exclude_id: Product ID to exclude
+        """
+        if not node or len(result) >= max_results:
+            return
+        
+        # Traverse left
+        self._recommend_by_category_helper(node.left, category, subcategory, 
+                                          result, max_results, exclude_id)
+        
+        if len(result) >= max_results:
+            return
+        
+        # Process current node
+        if node.value and isinstance(node.value, dict):
+            product = node.value
+            
+            # Skip excluded product
+            if exclude_id and node.key == exclude_id:
+                self._recommend_by_category_helper(node.right, category, subcategory, 
+                                                  result, max_results, exclude_id)
+                return
+            
+            current_category = product.get('category', '').lower()
+            current_subcategory = product.get('subcategory', '').lower()
+            
+            # Check if product matches criteria
+            category_match = current_category == category.lower()
+            
+            if subcategory:
+                subcategory_match = current_subcategory == subcategory.lower()
+                if category_match and subcategory_match:
+                    result.append({
+                        'product': product,
+                        'key': node.key
+                    })
+            elif category_match:
+                result.append({
+                    'product': product,
+                    'key': node.key
+                })
+        
+        # Traverse right
+        self._recommend_by_category_helper(node.right, category, subcategory, 
+                                          result, max_results, exclude_id)
