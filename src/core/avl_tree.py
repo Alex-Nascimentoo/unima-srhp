@@ -359,3 +359,36 @@ class AvlTree:
         result = []
         self._inorder(self.root, result)
         return result
+    
+    def level_order(self):
+        """
+        Get a level-order (breadth-first) traversal of the tree.
+        
+        Returns elements hierarchically by levels, from root to leaves.
+        
+        Returns:
+            List of lists, where each inner list contains (key, value) tuples
+            for nodes at that level
+        """
+        if not self.root:
+            return []
+        
+        result = []
+        queue = [self.root]
+        
+        while queue:
+            level_size = len(queue)
+            level_nodes = []
+            
+            for _ in range(level_size):
+                node = queue.pop(0)
+                level_nodes.append((node.key, node.value))
+                
+                if node.left:
+                    queue.append(node.left)
+                if node.right:
+                    queue.append(node.right)
+            
+            result.append(level_nodes)
+        
+        return result
