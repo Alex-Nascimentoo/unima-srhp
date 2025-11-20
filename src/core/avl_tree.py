@@ -20,6 +20,7 @@ class AvlTree:
         if node:
             node.height = 1 + max(self._height(node.left), self._height(node.right))
     
+    # Rotação simples a direita
     def _rotate_right(self, y):
         x = y.left
         y.left = x.right
@@ -28,6 +29,7 @@ class AvlTree:
         self._update_height(x)
         return x
     
+    # Rotação simples a esquerda
     def _rotate_left(self, x):
         y = x.right
         x.right = y.left
@@ -35,6 +37,42 @@ class AvlTree:
         self._update_height(x)
         self._update_height(y)
         return y
+    
+    # Rotação dupla a direita (Left-Right)
+    def _rotate_double_right(self, node):
+        node.left = self._rotate_left(node.left)
+        return self._rotate_right(node)
+    
+    # Rotação dupla a esquerda (Right-Left)
+    def _rotate_double_left(self, node):
+        node.right = self._rotate_right(node.right)
+        return self._rotate_left(node)
+    
+    def _rebalance(self, node):
+        """Rebalanceia o nó se necessário após inserção ou remoção"""
+        if not node:
+            return node
+        
+        self._update_height(node)
+        balance = self._balance(node)
+        
+        # Caso Left-Left
+        if balance > 1 and self._balance(node.left) >= 0:
+            return self._rotate_right(node)
+        
+        # Caso Left-Right
+        if balance > 1 and self._balance(node.left) < 0:
+            return self._rotate_double_right(node)
+        
+        # Caso Right-Right
+        if balance < -1 and self._balance(node.right) <= 0:
+            return self._rotate_left(node)
+        
+        # Caso Right-Left
+        if balance < -1 and self._balance(node.right) > 0:
+            return self._rotate_double_left(node)
+        
+        return node
     
     def _insert(self, node, key, value):
         if not node:
@@ -48,21 +86,7 @@ class AvlTree:
             node.value = value
             return node
         
-        self._update_height(node)
-        balance = self._balance(node)
-        
-        if balance > 1 and key < node.left.key:
-            return self._rotate_right(node)
-        if balance < -1 and key > node.right.key:
-            return self._rotate_left(node)
-        if balance > 1 and key > node.left.key:
-            node.left = self._rotate_left(node.left)
-            return self._rotate_right(node)
-        if balance < -1 and key < node.right.key:
-            node.right = self._rotate_right(node.right)
-            return self._rotate_left(node)
-        
-        return node
+        return self._rebalance(node)
     
     def insert(self, key, value=None):
         self.root = self._insert(self.root, key, value)
@@ -91,21 +115,7 @@ class AvlTree:
             node.value = temp.value
             node.right = self._delete(node.right, temp.key)
         
-        self._update_height(node)
-        balance = self._balance(node)
-        
-        if balance > 1 and self._balance(node.left) >= 0:
-            return self._rotate_right(node)
-        if balance > 1 and self._balance(node.left) < 0:
-            node.left = self._rotate_left(node.left)
-            return self._rotate_right(node)
-        if balance < -1 and self._balance(node.right) <= 0:
-            return self._rotate_left(node)
-        if balance < -1 and self._balance(node.right) > 0:
-            node.right = self._rotate_right(node.right)
-            return self._rotate_left(node)
-        
-        return node
+        return self._rebalance(node)
     
     def delete(self, key):
         self.root = self._delete(self.root, key)
