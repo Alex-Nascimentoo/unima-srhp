@@ -10,7 +10,7 @@ product_id_counter = 1
 
 @product_bp.route('/', methods=['GET'])
 def get_all_products():
-    products = [value.to_dict() for key, value in products_tree.inorder()]
+    products = [value for key, value in products_tree.inorder()]
     return jsonify(products), 200
 
 
