@@ -1,4 +1,5 @@
 from src.core.avl_tree import AvlTree
+from src.modules.product.routes import products_tree
 
 PRODUCTS_DB = {
     "shirt": [
@@ -36,10 +37,7 @@ CATEGORIES = {
     5: "sneakers"
 }
 
-# Single AVL Tree with all products (balanced by name)
-PRODUCTS_TREE = AvlTree()
-
 def start_local_db():
     for category, products in PRODUCTS_DB.items():
         for product in products:
-            PRODUCTS_TREE.insert(product["name"], product)
+            products_tree.insert(product["name"], product)
