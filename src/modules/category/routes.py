@@ -42,3 +42,4 @@ def delete_category(category_id):
         return jsonify({"error": "Category not found"}), 404
     
     return jsonify({"message": "Category deleted successfully"}), 200
+
