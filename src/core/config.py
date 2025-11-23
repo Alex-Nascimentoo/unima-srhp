@@ -39,6 +39,7 @@ CATEGORIES = {
 # Single AVL Tree with all products (balanced by name)
 PRODUCTS_TREE = AvlTree()
 
-for category, products in PRODUCTS_DB.items():
-    for product in products:
-        PRODUCTS_TREE.insert(product["name"], product)
+def start_local_db():
+    for category, products in PRODUCTS_DB.items():
+        for product in products:
+            PRODUCTS_TREE.insert(product["name"], product)
