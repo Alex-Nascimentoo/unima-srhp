@@ -1,5 +1,4 @@
 from flask import Blueprint, request, jsonify
-from src.db.config import db
 from model import Product
 
 product_bp = Blueprint("product", __name__)
@@ -12,10 +11,8 @@ def create_product():
         price=data["price"],
         category_id=data.get("category_id")
     )
-    db.session.add(product)
-    db.session.commit()
 
-    return jsonify({"message": "Produto criado!", "id": product.id})
+    return jsonify({"message": "Created product!", "id": product.id})
 
 @product_bp.get("/")
 def list_products():
