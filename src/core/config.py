@@ -1,6 +1,8 @@
 from src.core.avl_tree import AvlTree
 from src.modules.product.routes import products_tree
 from src.modules.category.routes import category_tree
+from src.model.category import Category
+from src.core.__init__ import CATEGORIES
 
 PRODUCTS_DB = {
     "shirt": [
@@ -30,18 +32,11 @@ PRODUCTS_DB = {
     ]
 }
 
-CATEGORIES = [
-    {"id": 1, "name" : "shirt"},
-    {"id": 2, "name" : "pants"},
-    {"id": 3, "name" : "shorts"},
-    {"id": 4, "name" : "jacket"},
-    {"id": 5, "name" : "sneakers"}
-]
 
 def start_local_db():
     for category, products in PRODUCTS_DB.items():
         for product in products:
             products_tree.insert(product["name"], product)
     for category in CATEGORIES:
-        category_tree.insert(category["name"], category)
-        print(category)
+        new_category = Category(category["id"], category["name"])
+        category_tree.insert(category["name"], new_category)
