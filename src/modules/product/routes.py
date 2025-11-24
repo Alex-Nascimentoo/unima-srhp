@@ -17,7 +17,9 @@ def get_all_products():
 @product_bp.route('/find', methods=['GET'])
 def find_product():
     product_id = request.args.get('id', type=int)
-    product = products_tree.search(product_id)
+    # product = products_tree.search(int(product_id))
+    product = products_tree.search_by_id(product_id)
+    # print(f"Found product: {product}")
     if product:
         return jsonify(product.to_dict()), 200
     return jsonify({'error': 'Product not found'}), 404

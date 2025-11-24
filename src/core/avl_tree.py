@@ -171,12 +171,13 @@ class AvlTree:
     
     # ==================== Insertion ====================
     
-    def _insert(self, node, key, value, inserted):
+    def _insert(self, node, id, key, value, inserted):
         """
         Recursively insert a key-value pair into the tree.
         
         Args:
             node: Current node in the recursion
+            id: Unique identifier for the node
             key: Key to insert
             value: Value to associate with the key
             inserted: List with single boolean to track if insertion occurred
@@ -187,13 +188,13 @@ class AvlTree:
         # Base case: found the insertion point
         if not node:
             inserted[0] = True
-            return AvlNode(key, value)
+            return AvlNode(id, key, value)
         
         # Recursive insertion
         if key < node.key:
-            node.left = self._insert(node.left, key, value, inserted)
+            node.left = self._insert(node.left, id, key, value, inserted)
         elif key > node.key:
-            node.right = self._insert(node.right, key, value, inserted)
+            node.right = self._insert(node.right, id, key, value, inserted)
         else:
             # Key already exists, don't update - set inserted to False
             inserted[0] = False
@@ -202,13 +203,14 @@ class AvlTree:
         # Rebalance the tree after insertion
         return self._rebalance(node)
     
-    def insert(self, key, value=None):
+    def insert(self, id, key, value=None):
         """
         Insert a key-value pair into the AVL tree.
         
         If the key already exists, returns a message and does not update the value.
         
         Args:
+            id: Unique identifier for the node
             key: Key to insert
             value: Optional value to associate with the key
             
@@ -216,7 +218,7 @@ class AvlTree:
             Dictionary with 'success' (bool) and 'message' (str) keys
         """
         inserted = [True]  # Use list to allow modification in nested function
-        self.root = self._insert(self.root, key, value, inserted)
+        self.root = self._insert(self.root, id, key, value, inserted)
         
         if inserted[0]:
             return {
@@ -324,6 +326,42 @@ class AvlTree:
             Value associated with the key, or None if not found
         """
         node = self._search(self.root, key)
+        return node.value if node else None
+    
+    def _search_by_id(self, node, id):
+        """
+        Recursively search for an id in the tree.
+        
+        Args:
+            node: Current node in the recursion
+            id: Id to search for
+            
+        Returns:
+            Node containing the id, or None if not found
+        """
+        print("inside specific function")
+        # print(f'self is: {self.root.id}')
+        print(f'node is: {node}')
+
+        if not node or node.id == id:
+            print(f'will return node: {node}')
+            return node
+        if id < node.id:
+            return self._search_by_id(node.left, id)
+        return self._search_by_id(node.right, id)
+    
+    def search_by_id(self, id):
+        """
+        Search for an id in the AVL tree.
+        
+        Args:
+            id: Id to search for
+            
+        Returns:
+            Value associated with the id, or None if not found
+        """
+        print(f"root is: {self.root}")
+        node = self._search_by_id(self.root, id)
         return node.value if node else None
     
     # ==================== Traversal ====================
