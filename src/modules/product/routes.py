@@ -33,15 +33,7 @@ def recommend_products():
     if not product:
         return jsonify({'error': 'Product not found'}), 404
 
-    category = category_tree.inorder()
-    print(f'Categories: {category}')
-    
-    # recommendations = [value for key, value in products_tree.inorder() 
-    #                   if value.id_category == product['id_category'] and value.id != product['id']]
-    recommendations = products_tree.recommend_by_category(product['id_category'], product_key)
-    # product_list = [value for key, value in products_tree.inorder()]
-    # print(f'Product List: {product_list}')
-    recommendations = []
+    recommendations = products_tree.find_similar_products(product_key)
     return jsonify(recommendations), 200
 
 

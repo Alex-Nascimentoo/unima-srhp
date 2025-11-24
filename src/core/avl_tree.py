@@ -380,30 +380,23 @@ class AvlTree:
             return
         
         # Process current node
-        if node.value and isinstance(node.value, dict):
-            current_product = node.value
+        if node.value and isinstance(node.value.to_dict(), dict):
+            current_product = node.value.to_dict()
             
             # Don't recommend the same product
-            if node.key == target_product.get('id'):
+            if node.key == target_product['id']:
                 self._collect_similar_products(node.right, target_product, result, max_results)
                 return
             
-            target_category = target_product.get('category')
-            target_subcategory = target_product.get('subcategory')
-            current_category = current_product.get('category')
-            current_subcategory = current_product.get('subcategory')
+            target_category = target_product['id_category']
+            current_category = current_product['id_category']
             
             # Calculate similarity score
             similarity_score = 0
             
-            # Exact subcategory match (highest priority)
-            if (target_subcategory and current_subcategory and 
-                target_subcategory.lower() == current_subcategory.lower()):
-                similarity_score = 2
-            
             # Same category match (medium priority)
-            elif (target_category and current_category and 
-                  target_category.lower() == current_category.lower()):
+            if (target_category and current_category and 
+                  target_category == current_category):
                 similarity_score = 1
             
             # If there's any similarity, add to results
@@ -454,7 +447,7 @@ class AvlTree:
         if not target_node or not target_node.value:
             return []
         
-        target_product = target_node.value
+        target_product = target_node.value.to_dict()
         
         # Ensure product has required fields
         if not isinstance(target_product, dict):
