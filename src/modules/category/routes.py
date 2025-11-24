@@ -27,8 +27,8 @@ def find_category():
 def add_category():
     global category_id_counter
     data = request.get_json()
-    category = Category(category_id_counter, data['name'])
-    category_tree.insert(category_id_counter, category)
+    category = Category(data['name'], {'id': category_id_counter, 'name': data['name']})
+    category_tree.insert(data["name"], category)
     category_id_counter += 1
     return jsonify(category.to_dict()), 201
 

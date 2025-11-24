@@ -41,7 +41,7 @@ CATEGORIES = [
 def start_local_db():
     for category, products in PRODUCTS_DB.items():
         for product in products:
-            products_tree.insert(product["id"], product["name"], product)
+            products_tree.insert(product["name"], product)
     for category in CATEGORIES:
         category_tree.insert(category["name"], category)
         print(category)
