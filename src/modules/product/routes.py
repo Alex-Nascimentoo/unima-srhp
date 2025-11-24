@@ -1,16 +1,18 @@
 from flask import Blueprint, request, jsonify
 from src.model.product import Product
 from src.core.avl_tree import AvlTree
+from src.core.__init__ import PRODUCTS_DB
+from src.modules.category.routes import category_tree
 
 product_bp = Blueprint('product', __name__, url_prefix='/business/product')
 
 products_tree = AvlTree()
-product_id_counter = 1
+product_id_counter = len(PRODUCTS_DB) + 1
 
 
 @product_bp.route('/', methods=['GET'])
 def get_all_products():
-    products = [value for key, value in products_tree.inorder()]
+    products = [value.to_dict() for key, value in products_tree.inorder()]
     return jsonify(products), 200
 
 
@@ -19,21 +21,24 @@ def find_product():
     product_key = request.args.get('key', type=str)
     product = products_tree.search(product_key)
     if product:
-        return jsonify(product), 200
+        return jsonify(product.to_dict()), 200
     return jsonify({'error': 'Product not found'}), 404
 
 
 @product_bp.route('/recommend', methods=['GET'])
 def recommend_products():
     product_key = request.args.get('key', type=str)
-    product = products_tree.search(product_key)
-    print(f'product is: {product}')
+    product = products_tree.search(product_key).to_dict()
+
     if not product:
         return jsonify({'error': 'Product not found'}), 404
+
+    category = category_tree.inorder()
+    print(f'Categories: {category}')
     
-    recommendations = [value for key, value in products_tree.inorder() 
-                      if value['id_category'] == product['id_category'] and value.id != product['id']]
-    # recommendations = products_tree.recommend_by_category(product['id_category'], product_key)
+    # recommendations = [value for key, value in products_tree.inorder() 
+    #                   if value.id_category == product['id_category'] and value.id != product['id']]
+    recommendations = products_tree.recommend_by_category(product['id_category'], product_key)
     # product_list = [value for key, value in products_tree.inorder()]
     # print(f'Product List: {product_list}')
     recommendations = []
@@ -45,7 +50,7 @@ def add_product():
     global product_id_counter
     data = request.get_json()
     product = Product(product_id_counter, data['name'], data['price'], data['id_category'])
-    products_tree.insert(product_id_counter, product)
+    products_tree.insert(data['name'], product)
     product_id_counter += 1
     return jsonify(product.to_dict()), 201
 
