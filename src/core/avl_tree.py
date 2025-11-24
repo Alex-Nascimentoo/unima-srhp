@@ -171,13 +171,12 @@ class AvlTree:
     
     # ==================== Insertion ====================
     
-    def _insert(self, node, id, key, value, inserted):
+    def _insert(self, node, key, value, inserted):
         """
         Recursively insert a key-value pair into the tree.
         
         Args:
             node: Current node in the recursion
-            id: Unique identifier for the node
             key: Key to insert
             value: Value to associate with the key
             inserted: List with single boolean to track if insertion occurred
@@ -188,13 +187,13 @@ class AvlTree:
         # Base case: found the insertion point
         if not node:
             inserted[0] = True
-            return AvlNode(id, key, value)
+            return AvlNode(key, value)
         
         # Recursive insertion
         if key < node.key:
-            node.left = self._insert(node.left, id, key, value, inserted)
+            node.left = self._insert(node.left, key, value, inserted)
         elif key > node.key:
-            node.right = self._insert(node.right, id, key, value, inserted)
+            node.right = self._insert(node.right, key, value, inserted)
         else:
             # Key already exists, don't update - set inserted to False
             inserted[0] = False
@@ -203,7 +202,7 @@ class AvlTree:
         # Rebalance the tree after insertion
         return self._rebalance(node)
     
-    def insert(self, id, key, value=None):
+    def insert(self, key, value=None):
         """
         Insert a key-value pair into the AVL tree.
         
@@ -218,7 +217,7 @@ class AvlTree:
             Dictionary with 'success' (bool) and 'message' (str) keys
         """
         inserted = [True]  # Use list to allow modification in nested function
-        self.root = self._insert(self.root, id, key, value, inserted)
+        self.root = self._insert(self.root, key, value, inserted)
         
         if inserted[0]:
             return {

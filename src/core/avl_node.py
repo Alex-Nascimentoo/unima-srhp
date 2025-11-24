@@ -10,7 +10,7 @@ class AvlNode:
         height: Height of the node (distance to furthest leaf)
     """
     
-    def __init__(self, id, key, value=None):
+    def __init__(self, key, value=None):
         """
         Initialize an AVL tree node.
         
@@ -19,7 +19,6 @@ class AvlNode:
             key: The key for this node
             value: Optional value to store with the key
         """
-        self.id = id
         self.key = key
         self.value = value
         self.left = None

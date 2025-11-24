@@ -30,8 +30,8 @@ def recommend_products():
     if not product:
         return jsonify({'error': 'Product not found'}), 404
     
-    recommendations = [value.to_dict() for key, value in products_tree.inorder() 
-                      if value.id_category == product.id_category and value.id != product_id]
+    recommendations = [value for key, value in products_tree.inorder() 
+                      if value.id_category == product['id_category'] and value.id != product_id]
     return jsonify(recommendations), 200
 
 
