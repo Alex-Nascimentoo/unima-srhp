@@ -1,12 +1,9 @@
-from src.core.avl_tree import AvlTree
 from src.modules.product.routes import products_tree
 from src.modules.category.routes import category_tree
 from src.model.category import Category
 from src.core.__init__ import CATEGORIES
 from src.model.product import Product
 from src.core.__init__ import PRODUCTS_DB
-
-
 
 def start_local_db():
     for product in PRODUCTS_DB:
