@@ -1,3 +1,11 @@
+CATEGORIES = [
+    {"id": 1, "name" : "shirt"},
+    {"id": 2, "name" : "pants"},
+    {"id": 3, "name" : "shorts"},
+    {"id": 4, "name" : "jacket"},
+    {"id": 5, "name" : "sneakers"}
+]
+
 PRODUCTS_DB = [
     { 'id': 1, "id_category": 1, "name": "Blue Polo Shirt", "price": 89.90 },
     { 'id': 2, "id_category": 1, "name": "White Dress Shirt", "price": 129.90 },
