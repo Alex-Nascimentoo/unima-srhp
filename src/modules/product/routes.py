@@ -25,13 +25,18 @@ def find_product():
 
 @product_bp.route('/recommend', methods=['GET'])
 def recommend_products():
-    product_id = request.args.get('id', type=int)
-    product = products_tree.search(product_id)
+    product_key = request.args.get('key', type=str)
+    product = products_tree.search(product_key)
+    print(f'product is: {product}')
     if not product:
         return jsonify({'error': 'Product not found'}), 404
     
     recommendations = [value for key, value in products_tree.inorder() 
-                      if value.id_category == product['id_category'] and value.id != product_id]
+                      if value['id_category'] == product['id_category'] and value.id != product['id']]
+    # recommendations = products_tree.recommend_by_category(product['id_category'], product_key)
+    # product_list = [value for key, value in products_tree.inorder()]
+    # print(f'Product List: {product_list}')
+    recommendations = []
     return jsonify(recommendations), 200
 
 
