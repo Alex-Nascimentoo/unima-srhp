@@ -2,7 +2,6 @@ from flask import Blueprint, request, jsonify
 from src.model.product import Product
 from src.core.avl_tree import AvlTree
 from src.core.__init__ import PRODUCTS_DB
-from src.modules.category.routes import category_tree
 
 product_bp = Blueprint('product', __name__, url_prefix='/business/product')
 
