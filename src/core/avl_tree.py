@@ -384,7 +384,7 @@ class AvlTree:
             current_product = node.value.to_dict()
             
             # Don't recommend the same product
-            if node.key == target_product['id']:
+            if node.key == target_product['name']:
                 self._collect_similar_products(node.right, target_product, result, max_results)
                 return
             
