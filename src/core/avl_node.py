@@ -15,6 +15,7 @@ class AvlNode:
         Initialize an AVL tree node.
         
         Args:
+            id: Unique identifier for the node
             key: The key for this node
             value: Optional value to store with the key
         """

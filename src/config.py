@@ -2,12 +2,15 @@ from flask import Flask
 from flask_cors import CORS
 from src.modules.business.routes import bp as business_bp
 from src.modules.product.routes import product_bp
+from src.core.config import start_local_db
 
 app = Flask(__name__)
 CORS(app)
 
 app.register_blueprint(business_bp)
 app.register_blueprint(product_bp)
+
+start_local_db()
 
 @app.route("/")
 def health_check():

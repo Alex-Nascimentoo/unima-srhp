@@ -1,21 +1,24 @@
 from flask import Blueprint, request, jsonify
 from src.model.product import Product
+from src.core.avl_tree import AvlTree
+from src.core.__init__ import PRODUCTS_DB
 
 product_bp = Blueprint('product', __name__, url_prefix='/business/product')
 
-products_db = []
-product_id_counter = 1
+products_tree = AvlTree()
+product_id_counter = len(PRODUCTS_DB) + 1
 
 
 @product_bp.route('/', methods=['GET'])
 def get_all_products():
-    return jsonify([p.to_dict() for p in products_db]), 200
+    products = [value.to_dict() for key, value in products_tree.inorder()]
+    return jsonify(products), 200
 
 
 @product_bp.route('/find', methods=['GET'])
 def find_product():
-    product_id = request.args.get('id', type=int)
-    product = next((p for p in products_db if p.id == product_id), None)
+    product_key = request.args.get('key', type=str)
+    product = products_tree.search(product_key)
     if product:
         return jsonify(product.to_dict()), 200
     return jsonify({'error': 'Product not found'}), 404
@@ -23,12 +26,13 @@ def find_product():
 
 @product_bp.route('/recommend', methods=['GET'])
 def recommend_products():
-    product_id = request.args.get('id', type=int)
-    product = next((p for p in products_db if p.id == product_id), None)
+    product_key = request.args.get('key', type=str)
+    product = products_tree.search(product_key).to_dict()
+
     if not product:
         return jsonify({'error': 'Product not found'}), 404
-    
-    recommendations = [p.to_dict() for p in products_db if p.id_category == product.id_category and p.id != product_id]
+
+    recommendations = products_tree.find_similar_products(product_key)
     return jsonify(recommendations), 200
 
 
@@ -37,14 +41,14 @@ def add_product():
     global product_id_counter
     data = request.get_json()
     product = Product(product_id_counter, data['name'], data['price'], data['id_category'])
-    products_db.append(product)
+    products_tree.insert(data['name'], product)
     product_id_counter += 1
     return jsonify(product.to_dict()), 201
 
 
 @product_bp.route('/update/<int:product_id>', methods=['PUT'])
 def update_product(product_id):
-    product = next((p for p in products_db if p.id == product_id), None)
+    product = products_tree.search(product_id)
     if not product:
         return jsonify({'error': 'Product not found'}), 404
     
@@ -57,10 +61,9 @@ def update_product(product_id):
 
 @product_bp.route('/delete/<int:product_id>', methods=['DELETE'])
 def delete_product(product_id):
-    global products_db
-    product = next((p for p in products_db if p.id == product_id), None)
+    product = products_tree.search(product_id)
     if not product:
         return jsonify({'error': 'Product not found'}), 404
     
-    products_db = [p for p in products_db if p.id != product_id]
+    products_tree.delete(product_id)
     return jsonify({'message': 'Product deleted'}), 200
