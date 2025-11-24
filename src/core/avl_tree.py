@@ -327,42 +327,7 @@ class AvlTree:
         """
         node = self._search(self.root, key)
         return node.value if node else None
-    
-    def _search_by_id(self, node, id):
-        """
-        Recursively search for an id in the tree.
-        
-        Args:
-            node: Current node in the recursion
-            id: Id to search for
-            
-        Returns:
-            Node containing the id, or None if not found
-        """
-        print("inside specific function")
-        # print(f'self is: {self.root.id}')
-        print(f'node is: {node}')
 
-        if not node or node.id == id:
-            print(f'will return node: {node}')
-            return node
-        if id < node.id:
-            return self._search_by_id(node.left, id)
-        return self._search_by_id(node.right, id)
-    
-    def search_by_id(self, id):
-        """
-        Search for an id in the AVL tree.
-        
-        Args:
-            id: Id to search for
-            
-        Returns:
-            Value associated with the id, or None if not found
-        """
-        print(f"root is: {self.root}")
-        node = self._search_by_id(self.root, id)
-        return node.value if node else None
     
     # ==================== Traversal ====================
     
