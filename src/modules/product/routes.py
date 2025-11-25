@@ -11,7 +11,7 @@ product_id_counter = len(PRODUCTS_DB) + 1
 
 @product_bp.route('/', methods=['GET'])
 def get_all_products():
-    products = [value.to_dict() for key, value in products_tree.inorder()]
+    products = [{'key': key, **value.to_dict()} for key, value in products_tree.inorder()]
     return jsonify(products), 200
 
 
@@ -46,24 +46,31 @@ def add_product():
     return jsonify(product.to_dict()), 201
 
 
-@product_bp.route('/update/<int:product_id>', methods=['PUT'])
-def update_product(product_id):
-    product = products_tree.search(product_id)
+@product_bp.route('/update/<product_key>', methods=['PUT'])
+def update_product(product_key):
+    product = products_tree.search(product_key)
     if not product:
         return jsonify({'error': 'Product not found'}), 404
     
     data = request.get_json()
+    product.key = data.get('name', product.name)
     product.name = data.get('name', product.name)
     product.price = data.get('price', product.price)
     product.id_category = data.get('id_category', product.id_category)
+
+    product_node = products_tree._search(products_tree.root, product_key)
+
+    print('new key is: ', product_node.key)
+
+    products_tree._rebalance(product_node)
     return jsonify(product.to_dict()), 200
 
 
-@product_bp.route('/delete/<int:product_id>', methods=['DELETE'])
-def delete_product(product_id):
-    product = products_tree.search(product_id)
+@product_bp.route('/delete/<product_key>', methods=['DELETE'])
+def delete_product(product_key):
+    product = products_tree.search(product_key)
     if not product:
         return jsonify({'error': 'Product not found'}), 404
     
-    products_tree.delete(product_id)
+    products_tree.delete(product_key)
     return jsonify({'message': 'Product deleted'}), 200
