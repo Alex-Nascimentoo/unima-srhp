@@ -1,0 +1,76 @@
+from flask import Blueprint, request, jsonify
+from src.model.product import Product
+from src.core.avl_tree import AvlTree
+from src.core.__init__ import PRODUCTS_DB
+
+product_bp = Blueprint('product', __name__, url_prefix='/business/product')
+
+products_tree = AvlTree()
+product_id_counter = len(PRODUCTS_DB) + 1
+
+
+@product_bp.route('/', methods=['GET'])
+def get_all_products():
+    products = [{'key': key, **value.to_dict()} for key, value in products_tree.inorder()]
+    return jsonify(products), 200
+
+
+@product_bp.route('/find', methods=['GET'])
+def find_product():
+    product_key = request.args.get('key', type=str)
+    product = products_tree.search(product_key)
+    if product:
+        return jsonify(product.to_dict()), 200
+    return jsonify({'error': 'Product not found'}), 404
+
+
+@product_bp.route('/recommend', methods=['GET'])
+def recommend_products():
+    product_key = request.args.get('key', type=str)
+    product = products_tree.search(product_key).to_dict()
+
+    if not product:
+        return jsonify({'error': 'Product not found'}), 404
+
+    recommendations = products_tree.find_similar_products(product_key)
+    return jsonify(recommendations), 200
+
+
+@product_bp.route('/add', methods=['POST'])
+def add_product():
+    global product_id_counter
+    data = request.get_json()
+    product = Product(product_id_counter, data['name'], data['price'], data['id_category'])
+    products_tree.insert(data['name'], product)
+    product_id_counter += 1
+    return jsonify(product.to_dict()), 201
+
+
+@product_bp.route('/update/<product_key>', methods=['PUT'])
+def update_product(product_key):
+    product = products_tree.search(product_key)
+    if not product:
+        return jsonify({'error': 'Product not found'}), 404
+    
+    data = request.get_json()
+    product.key = data.get('name', product.name)
+    product.name = data.get('name', product.name)
+    product.price = data.get('price', product.price)
+    product.id_category = data.get('id_category', product.id_category)
+
+    product_node = products_tree._search(products_tree.root, product_key)
+
+    print('new key is: ', product_node.key)
+
+    products_tree._rebalance(product_node)
+    return jsonify(product.to_dict()), 200
+
+
+@product_bp.route('/delete/<product_key>', methods=['DELETE'])
+def delete_product(product_key):
+    product = products_tree.search(product_key)
+    if not product:
+        return jsonify({'error': 'Product not found'}), 404
+    
+    products_tree.delete(product_key)
+    return jsonify({'message': 'Product deleted'}), 200
